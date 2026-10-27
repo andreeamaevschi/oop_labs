@@ -34,30 +34,43 @@ class Logger:
         text = text.replace("%m", message)
         print(text)
 
+    def trace(self, message):
+        self.log(LogLevel.TRACE, message)
+
+    def info(self, message):
+        self.log(LogLevel.INFO, message)
+
+    def warn(self, message):
+        self.log(LogLevel.WARN, message)
+
+    def error(self, message):
+        self.log(LogLevel.ERROR, message)
+
 
 def test_logger():
     print("Logger levels")
     app = Logger("App")
     db = Logger("Database")
-    app.log(LogLevel.TRACE, "This is a trace message")
-    app.log(LogLevel.INFO, "This is an info message")
-    db.log(LogLevel.WARN, "This is a warning")
-    db.log(LogLevel.ERROR, "This is an error")
+    app.trace("This is a trace message")
+    app.info("This is an info message")
+    db.warn("This is a warning")
+    db.error("This is an error")
     Logger.set_level(LogLevel.ERROR)
     print("Level changed to ERROR")
-    app.log(LogLevel.INFO, "This info is hidden now")
-    db.log(LogLevel.ERROR, "Only errors are printed")
+    app.info("This info is hidden now")
+    db.error("Only errors are printed")
+    Logger.set_level(LogLevel.INFO)
 
     print("Logger formats")
     test = Logger("Parentheses")
     Logger.set_format("[%l] %m")
-    test.log(LogLevel.ERROR, "Invalid input")
+    test.error("Invalid input")
     Logger.set_format("%n: %m")
-    test.log(LogLevel.ERROR, "Valid input")
+    test.info("Valid input")
     Logger.set_format("[%t] %m")
-    test.log(LogLevel.ERROR, "Valid input")
+    test.info("Valid input")
     Logger.set_format("%l - %n - %m")
-    test.log(LogLevel.ERROR, "Valid input")
+    test.info("Valid input")
     Logger.set_format("[%t] [%l] %n: %m")
 
 
