@@ -47,6 +47,21 @@ class Logger:
         self.log(LogLevel.ERROR, message)
 
 
+class ParenthesesValidator:
+    def is_valid(self, text):
+        open_count = 0
+        for i in range(len(text)):
+            if text[i] == "(":
+                open_count += 1
+            elif text[i] == ")":
+                if open_count == 0:
+                    return False
+                open_count -= 1
+        if open_count > 0:
+            return False
+        return True
+
+
 def test_logger():
     print("Logger levels")
     app = Logger("App")
@@ -74,4 +89,26 @@ def test_logger():
     Logger.set_format("[%t] [%l] %n: %m")
 
 
+def test_validator():
+    print("Parentheses tests")
+    validator = ParenthesesValidator()
+    tests = [
+        ("()", True),
+        (")(()))", False),
+        ("(", False),
+        ("(())((()())())", True),
+        ("(()", False),
+        ("())", False),
+        ("", True),
+    ]
+    for text, expected in tests:
+        print(f"Input: {text}")
+        result = validator.is_valid(text)
+        if result == expected:
+            print("PASS")
+        else:
+            print(f"FAIL, expected {expected}")
+
+
 test_logger()
+test_validator()
