@@ -48,17 +48,28 @@ class Logger:
 
 
 class ParenthesesValidator:
+    def __init__(self):
+        self.logger = Logger("Parentheses")
+
     def is_valid(self, text):
         open_count = 0
         for i in range(len(text)):
             if text[i] == "(":
                 open_count += 1
+                self.logger.trace(f"Opening parenthesis found at position {i}")
             elif text[i] == ")":
                 if open_count == 0:
+                    self.logger.warn(f"Closing parenthesis at position {i} has nothing to match")
+                    self.logger.error(f"{text} is invalid because a closing parenthesis has no opening parenthesis")
+                    self.logger.info("Result: false")
                     return False
                 open_count -= 1
+                self.logger.info(f"Matching pair found, closed at position {i}")
         if open_count > 0:
+            self.logger.error(f"{text} is invalid because {open_count} opening parenthesis has no match")
+            self.logger.info("Result: false")
             return False
+        self.logger.info("Result: true")
         return True
 
 
@@ -91,6 +102,7 @@ def test_logger():
 
 def test_validator():
     print("Parentheses tests")
+    Logger.set_level(LogLevel.INFO)
     validator = ParenthesesValidator()
     tests = [
         ("()", True),
@@ -108,6 +120,10 @@ def test_validator():
             print("PASS")
         else:
             print(f"FAIL, expected {expected}")
+
+    print("Same input with level TRACE")
+    Logger.set_level(LogLevel.TRACE)
+    validator.is_valid("(()")
 
 
 test_logger()
