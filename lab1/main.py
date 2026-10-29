@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 from enum import Enum
 
@@ -12,6 +13,12 @@ class LogLevel(Enum):
 class Logger:
     level = LogLevel.INFO
     format = "[%t] [%l] %n: %m"
+    random_messages = {
+        LogLevel.TRACE: ["Checking the next step", "Still working", "Looking closer"],
+        LogLevel.INFO: ["Operation completed", "Everything looks good", "Here is your result"],
+        LogLevel.WARN: ["Be careful", "This looks strange", "Something is not right"],
+        LogLevel.ERROR: ["Something went wrong", "This did not work", "Please check the input"],
+    }
 
     def __init__(self, name):
         self.__name = name
@@ -31,6 +38,7 @@ class Logger:
         text = text.replace("%t", datetime.now().strftime("%H:%M:%S"))
         text = text.replace("%l", msg_level.name)
         text = text.replace("%n", self.__name)
+        text = text.replace("%r", random.choice(Logger.random_messages[msg_level]))
         text = text.replace("%m", message)
         print(text)
 
@@ -97,6 +105,9 @@ def test_logger():
     test.info("Valid input")
     Logger.set_format("%l - %n - %m")
     test.info("Valid input")
+    Logger.set_format("[%l] %r: %m")
+    test.info("Valid input")
+    test.error("Invalid input")
     Logger.set_format("[%t] [%l] %n: %m")
 
 
