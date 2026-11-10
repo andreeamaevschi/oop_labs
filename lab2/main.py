@@ -10,6 +10,29 @@ class LogLevel(Enum):
     ERROR = 4
 
 
+class Formatter:
+    format_string = "[%t] [%l] %n: %m"
+    random_messages = {
+        LogLevel.TRACE: ["Checking the next step", "Still working", "Looking closer"],
+        LogLevel.INFO: ["Operation completed", "Everything looks good", "Here is your result"],
+        LogLevel.WARN: ["Be careful", "This looks strange", "Something is not right"],
+        LogLevel.ERROR: ["Something went wrong", "This did not work", "Please check the input"],
+    }
+
+    @classmethod
+    def set_format(cls, new_format):
+        cls.format_string = new_format
+
+    def format(self, level, name, message):
+        line = Formatter.format_string
+        line = line.replace("%t", datetime.now().strftime("%H:%M:%S"))
+        line = line.replace("%l", level.name)
+        line = line.replace("%n", name)
+        line = line.replace("%r", random.choice(Formatter.random_messages[level]))
+        line = line.replace("%m", message)
+        return line
+
+
 class Logger:
     level = LogLevel.INFO
     format = "[%t] [%l] %n: %m"
@@ -81,6 +104,23 @@ class ParenthesesValidator:
         return True
 
 
+def test_formatter():
+    print("Formatter tests")
+    f = Formatter()
+    print(f.format(LogLevel.INFO, "Parentheses", "Valid input"))
+    Formatter.set_format("[%l] %m")
+    print(f.format(LogLevel.ERROR, "Parentheses", "Invalid input"))
+    Formatter.set_format("%n: %m")
+    print(f.format(LogLevel.INFO, "Parentheses", "Valid input"))
+    Formatter.set_format("%l - %n - %m")
+    print(f.format(LogLevel.INFO, "Parentheses", "Valid input"))
+    Formatter.set_format("[%l] %r: %m")
+    print(f.format(LogLevel.INFO, "Parentheses", "Valid input"))
+    Formatter.set_format("%n: %m")
+    print(f.format(LogLevel.INFO, "Test", "Ratio is 100%n"))
+    Formatter.set_format("[%t] [%l] %n: %m")
+
+
 def test_logger():
     print("Logger levels")
     app = Logger("App")
@@ -137,5 +177,6 @@ def test_validator():
     validator.is_valid("(()")
 
 
+test_formatter()
 test_logger()
 test_validator()
