@@ -33,37 +33,28 @@ class Formatter:
         return line
 
 
+class ConsoleSink:
+    def write(self, line):
+        print(line)
+
+
 class Logger:
     level = LogLevel.INFO
-    format = "[%t] [%l] %n: %m"
-    random_messages = {
-        LogLevel.TRACE: ["Checking the next step", "Still working", "Looking closer"],
-        LogLevel.INFO: ["Operation completed", "Everything looks good", "Here is your result"],
-        LogLevel.WARN: ["Be careful", "This looks strange", "Something is not right"],
-        LogLevel.ERROR: ["Something went wrong", "This did not work", "Please check the input"],
-    }
 
     def __init__(self, name):
         self.__name = name
+        self.__formatter = Formatter()
+        self.__sink = ConsoleSink()
 
     @classmethod
     def set_level(cls, new_level):
         cls.level = new_level
 
-    @classmethod
-    def set_format(cls, new_format):
-        cls.format = new_format
-
     def log(self, msg_level, message):
         if msg_level.value < Logger.level.value:
             return
-        text = Logger.format
-        text = text.replace("%t", datetime.now().strftime("%H:%M:%S"))
-        text = text.replace("%l", msg_level.name)
-        text = text.replace("%n", self.__name)
-        text = text.replace("%r", random.choice(Logger.random_messages[msg_level]))
-        text = text.replace("%m", message)
-        print(text)
+        line = self.__formatter.format(msg_level, self.__name, message)
+        self.__sink.write(line)
 
     def trace(self, message):
         self.log(LogLevel.TRACE, message)
@@ -122,7 +113,7 @@ def test_formatter():
 
 
 def test_logger():
-    print("Logger levels")
+    print("Logger tests")
     app = Logger("App")
     db = Logger("Database")
     app.trace("This is a trace message")
@@ -134,21 +125,6 @@ def test_logger():
     app.info("This info is hidden now")
     db.error("Only errors are printed")
     Logger.set_level(LogLevel.INFO)
-
-    print("Logger formats")
-    test = Logger("Parentheses")
-    Logger.set_format("[%l] %m")
-    test.error("Invalid input")
-    Logger.set_format("%n: %m")
-    test.info("Valid input")
-    Logger.set_format("[%t] %m")
-    test.info("Valid input")
-    Logger.set_format("%l - %n - %m")
-    test.info("Valid input")
-    Logger.set_format("[%l] %r: %m")
-    test.info("Valid input")
-    test.error("Invalid input")
-    Logger.set_format("[%t] [%l] %n: %m")
 
 
 def test_validator():
