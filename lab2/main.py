@@ -41,10 +41,14 @@ class ConsoleSink:
 class Logger:
     level = LogLevel.INFO
 
-    def __init__(self, name):
+    def __init__(self, name, formatter=None, sink=None):
         self.__name = name
-        self.__formatter = Formatter()
-        self.__sink = ConsoleSink()
+        if formatter == None:
+            formatter = Formatter()
+        if sink == None:
+            sink = ConsoleSink()
+        self.__formatter = formatter
+        self.__sink = sink
 
     @classmethod
     def set_level(cls, new_level):
@@ -125,6 +129,13 @@ def test_logger():
     app.info("This info is hidden now")
     db.error("Only errors are printed")
     Logger.set_level(LogLevel.INFO)
+
+    shared = Formatter()
+    console = ConsoleSink()
+    parser = Logger("Parser", shared, console)
+    manager = Logger("Manager", shared, console)
+    parser.info("I use the shared formatter")
+    manager.info("Me too")
 
 
 def test_validator():
