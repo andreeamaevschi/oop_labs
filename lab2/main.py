@@ -11,7 +11,6 @@ class LogLevel(Enum):
 
 
 class Formatter:
-    format_string = "[%t] [%l] %n: %m"
     random_messages = {
         LogLevel.TRACE: ["Checking the next step", "Still working", "Looking closer"],
         LogLevel.INFO: ["Operation completed", "Everything looks good", "Here is your result"],
@@ -19,12 +18,11 @@ class Formatter:
         LogLevel.ERROR: ["Something went wrong", "This did not work", "Please check the input"],
     }
 
-    @classmethod
-    def set_format(cls, new_format):
-        cls.format_string = new_format
+    def __init__(self, format="[%t] [%l] %n: %m"):
+        self.__format = format
 
     def format(self, level, name, message):
-        line = Formatter.format_string
+        line = self.__format
         line = line.replace("%t", datetime.now().strftime("%H:%M:%S"))
         line = line.replace("%l", level.name)
         line = line.replace("%n", name)
@@ -101,19 +99,17 @@ class ParenthesesValidator:
 
 def test_formatter():
     print("Formatter tests")
-    f = Formatter()
-    print(f.format(LogLevel.INFO, "Parentheses", "Valid input"))
-    Formatter.set_format("[%l] %m")
-    print(f.format(LogLevel.ERROR, "Parentheses", "Invalid input"))
-    Formatter.set_format("%n: %m")
-    print(f.format(LogLevel.INFO, "Parentheses", "Valid input"))
-    Formatter.set_format("%l - %n - %m")
-    print(f.format(LogLevel.INFO, "Parentheses", "Valid input"))
-    Formatter.set_format("[%l] %r: %m")
-    print(f.format(LogLevel.INFO, "Parentheses", "Valid input"))
-    Formatter.set_format("%n: %m")
-    print(f.format(LogLevel.INFO, "Test", "Ratio is 100%n"))
-    Formatter.set_format("[%t] [%l] %n: %m")
+    f1 = Formatter()
+    f2 = Formatter("[%l] %m")
+    f3 = Formatter("%n: %m")
+    f4 = Formatter("%l - %n - %m")
+    f5 = Formatter('[%l] %r: %m')
+    print(f1.format(LogLevel.INFO, "Parentheses", "Valid input"))
+    print(f2.format(LogLevel.ERROR, "Parentheses", "Invalid input"))
+    print(f3.format(LogLevel.INFO, "Parentheses", "Valid input"))
+    print(f4.format(LogLevel.INFO, "Parentheses", "Valid input"))
+    print(f5.format(LogLevel.INFO, "Parentheses", "Valid input"))
+    print(f3.format(LogLevel.INFO, "Test", "Ratio is 100%n"))
 
 
 def test_logger():
@@ -130,12 +126,14 @@ def test_logger():
     db.error("Only errors are printed")
     Logger.set_level(LogLevel.INFO)
 
-    shared = Formatter()
+    shared = Formatter("[%t] [%l] %n: %m")
     console = ConsoleSink()
     parser = Logger("Parser", shared, console)
     manager = Logger("Manager", shared, console)
+    special = Logger("Special", Formatter("%l >> %m"), console)
     parser.info("I use the shared formatter")
     manager.info("Me too")
+    special.info("I have my own formatter")
 
 
 def test_validator():
