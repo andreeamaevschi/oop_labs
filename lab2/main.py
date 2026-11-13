@@ -1,3 +1,4 @@
+import math
 import random
 from datetime import datetime
 from enum import Enum
@@ -162,6 +163,69 @@ def test_validator():
     validator.is_valid("(()")
 
 
+class Display:
+    def __init__(self, model, width, height, ppi):
+        self.model = model
+        self.width = width
+        self.height = height
+        self.ppi = ppi
+
+    def getDiagonal(self):
+        return math.sqrt(self.width * self.width + self.height * self.height) / self.ppi
+
+    def compareSize(self, other):
+        d1 = round(self.getDiagonal(), 1)
+        d2 = round(other.getDiagonal(), 1)
+        if d1 > d2:
+            print(f'{self.model} ({d1}") is bigger than {other.model} ({d2}")')
+            return 1
+        elif d1 < d2:
+            print(f'{self.model} ({d1}") is smaller than {other.model} ({d2}")')
+            return -1
+        else:
+            print(f'{self.model} ({d1}") has the same size as {other.model} ({d2}")')
+            return 0
+
+    def compareSharpness(self, other):
+        if self.ppi > other.ppi:
+            print(f"{self.model} ({self.ppi} ppi) is sharper than {other.model} ({other.ppi} ppi)")
+            return 1
+        elif self.ppi < other.ppi:
+            print(f"{self.model} ({self.ppi} ppi) is less sharp than {other.model} ({other.ppi} ppi)")
+            return -1
+        else:
+            print(f"{self.model} and {other.model} are the same sharpness ({self.ppi} ppi)")
+            return 0
+
+    def compareWithMonitor(self, other):
+        size = self.compareSize(other)
+        sharp = self.compareSharpness(other)
+        if size == 1 and sharp == 1:
+            print(f"Verdict: {self.model} is better, it is bigger and sharper")
+        elif size == -1 and sharp == -1:
+            print(f"Verdict: {other.model} is better, it is bigger and sharper")
+        elif size == 0 and sharp == 0:
+            print("Verdict: they are the same")
+        elif size + sharp > 0:
+            print(f"Verdict: {self.model} is a bit better")
+        elif size + sharp < 0:
+            print(f"Verdict: {other.model} is a bit better")
+        else:
+            print("Verdict: each one is better at something, it depends what you need")
+
+
+def testDisplays():
+    print("Display tests")
+    d1 = Display("Samsung-Odyssey-G5", 2560, 1440, 93.0)
+    d2 = Display("LG-27GP850", 2560, 1440, 108.8)
+    d3 = Display("Dell-U2723QE", 3840, 2160, 163.0)
+    d1.compareSize(d2)
+    d2.compareSharpness(d3)
+    d1.compareWithMonitor(d3)
+    d2.compareWithMonitor(d3)
+
+
 test_formatter()
 test_logger()
 test_validator()
+testDisplays()
