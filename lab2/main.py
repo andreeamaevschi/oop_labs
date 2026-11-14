@@ -225,7 +225,49 @@ def testDisplays():
     d2.compareWithMonitor(d3)
 
 
+class DisplayManager:
+    def __init__(self, name):
+        self.name = name
+        self.assignedDisplays = []
+
+    def assignDisplay(self, d):
+        self.assignedDisplays.append(d)
+
+    def assist(self):
+        i = 0
+        while i < len(self.assignedDisplays) - 1:
+            self.assignedDisplays[i].compareWithMonitor(self.assignedDisplays[i + 1])
+            i = i + 1
+
+    def buyDisplay(self, d):
+        self.assignedDisplays.remove(d)
+        return d
+
+
+def testManagers():
+    print("Manager tests")
+    bob = DisplayManager("Bob")
+    alice = DisplayManager("Alice")
+    dell = Display("Dell-U2723QE", 3840, 2160, 163.0)
+    lg = Display("LG-27GP850", 2560, 1440, 108.8)
+    apple = Display("Apple-StudioDisplay", 5120, 2880, 218.0)
+    bob.assignDisplay(dell)
+    bob.assignDisplay(lg)
+    alice.assignDisplay(apple)
+    alice.assignDisplay(dell)
+    bob.assist()
+    bought = bob.buyDisplay(dell)
+    print("Bought:", bought.model)
+    print("Bob still has:")
+    for d in bob.assignedDisplays:
+        print("  ", d.model)
+    print("Alice still has:")
+    for d in alice.assignedDisplays:
+        print("  ", d.model)
+
+
 test_formatter()
 test_logger()
 test_validator()
 testDisplays()
+testManagers()
