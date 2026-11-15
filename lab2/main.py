@@ -226,14 +226,23 @@ def testDisplays():
 
 
 class DisplayManager:
-    def __init__(self, name):
+    def __init__(self, name, logger):
         self.name = name
         self.assignedDisplays = []
+        self.logger = logger
 
     def assignDisplay(self, d):
         self.assignedDisplays.append(d)
+        self.logger.trace(f"{d.model} assigned to {self.name}")
 
     def assist(self):
+        if len(self.assignedDisplays) == 0:
+            self.logger.warn(f"{self.name} has no displays, nothing to compare")
+            return
+        if len(self.assignedDisplays) == 1:
+            self.logger.warn(f"{self.name} has only {self.assignedDisplays[0].model}, nothing to compare it with")
+            return
+        print(f"{self.name} compares the displays:")
         i = 0
         while i < len(self.assignedDisplays) - 1:
             self.assignedDisplays[i].compareWithMonitor(self.assignedDisplays[i + 1])
@@ -241,13 +250,17 @@ class DisplayManager:
 
     def buyDisplay(self, d):
         self.assignedDisplays.remove(d)
+        self.logger.info(f"{self.name} sold {d.model}")
+        if len(self.assignedDisplays) == 0:
+            self.logger.warn(f"{self.name} has no displays left after this purchase")
         return d
 
 
 def testManagers():
     print("Manager tests")
-    bob = DisplayManager("Bob")
-    alice = DisplayManager("Alice")
+    Logger.set_level(LogLevel.TRACE)
+    bob = DisplayManager("Bob", managerLog)
+    alice = DisplayManager("Alice", managerLog)
     dell = Display("Dell-U2723QE", 3840, 2160, 163.0)
     lg = Display("LG-27GP850", 2560, 1440, 108.8)
     apple = Display("Apple-StudioDisplay", 5120, 2880, 218.0)
@@ -264,7 +277,12 @@ def testManagers():
     print("Alice still has:")
     for d in alice.assignedDisplays:
         print("  ", d.model)
+    Logger.set_level(LogLevel.INFO)
 
+
+formatter = Formatter("[%l] %n: %m")
+sink = ConsoleSink()
+managerLog = Logger("Manager", formatter, sink)
 
 test_formatter()
 test_logger()
