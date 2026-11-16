@@ -1,3 +1,5 @@
+import sys
+import os
 import math
 import random
 from datetime import datetime
@@ -280,12 +282,42 @@ def testManagers():
     Logger.set_level(LogLevel.INFO)
 
 
+class CommandReader:
+    def __init__(self, path, logger):
+        self.path = path
+        self.logger = logger
+
+    def readLines(self):
+        if os.path.exists(self.path) == False:
+            self.logger.error(f"File {self.path} does not exist, stopping")
+            return None
+        f = open(self.path)
+        lines = f.readlines()
+        f.close()
+        return lines
+
+
+def runShop(path):
+    reader = CommandReader(path, parserLog)
+    lines = reader.readLines()
+    if lines == None:
+        return
+    number = 0
+    for line in lines:
+        number = number + 1
+        print(number, line.strip())
+
+
 formatter = Formatter("[%l] %n: %m")
 sink = ConsoleSink()
 managerLog = Logger("Manager", formatter, sink)
+parserLog = Logger("Parser", formatter, sink)
 
-test_formatter()
-test_logger()
-test_validator()
-testDisplays()
-testManagers()
+if len(sys.argv) > 1:
+    runShop(sys.argv[1])
+else:
+    test_formatter()
+    test_logger()
+    test_validator()
+    testDisplays()
+    testManagers()
