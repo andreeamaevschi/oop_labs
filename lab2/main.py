@@ -297,15 +297,49 @@ class CommandReader:
         return lines
 
 
+managers = []
+displays = []
+
+
+def findManager(name):
+    for m in managers:
+        if m.name == name:
+            return m
+    return None
+
+
+def findDisplay(model):
+    for d in displays:
+        if d.model == model:
+            return d
+    return None
+
+
+def parseCommand(line, number):
+    words = line.split()
+    if len(words) == 0 or words[0].startswith("#"):
+        return
+    command = words[0]
+    if command == "MANAGER":
+        managers.append(DisplayManager(words[1], managerLog))
+        parserLog.trace(f"Manager {words[1]} created")
+    elif command == "DISPLAY":
+        d = Display(words[1], int(words[2]), int(words[3]), float(words[4]))
+        displays.append(d)
+        parserLog.trace(f'Display {d.model} created ({round(d.getDiagonal(), 1)}", {int(d.ppi)} ppi)')
+    else:
+        print("Unknown command:", command)
+
+
 def runShop(path):
     reader = CommandReader(path, parserLog)
     lines = reader.readLines()
     if lines == None:
         return
-    number = 0
+    number=0
     for line in lines:
-        number = number + 1
-        print(number, line.strip())
+        number=number+1
+        parseCommand(line, number)
 
 
 formatter = Formatter("[%l] %n: %m")
