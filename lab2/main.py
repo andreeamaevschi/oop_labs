@@ -327,6 +327,22 @@ def parseCommand(line, number):
         d = Display(words[1], int(words[2]), int(words[3]), float(words[4]))
         displays.append(d)
         parserLog.trace(f'Display {d.model} created ({round(d.getDiagonal(), 1)}", {int(d.ppi)} ppi)')
+    elif command == "ASSIGN":
+        d = findDisplay(words[1])
+        m = findManager(words[2])
+        m.assignDisplay(d)
+    elif command == "COMPARE":
+        d1 = findDisplay(words[1])
+        d2 = findDisplay(words[2])
+        print(f"Compare {d1.model} with {d2.model}:")
+        d1.compareWithMonitor(d2)
+    elif command == "ASSIST":
+        m = findManager(words[1])
+        m.assist()
+    elif command == "BUY":
+        d = findDisplay(words[1])
+        m = findManager(words[2])
+        m.buyDisplay(d)
     else:
         print("Unknown command:", command)
 
