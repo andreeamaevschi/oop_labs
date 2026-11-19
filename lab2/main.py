@@ -321,30 +321,82 @@ def parseCommand(line, number):
         return
     command = words[0]
     if command == "MANAGER":
+        if len(words) != 2:
+            parserLog.error(f"Line {number}: MANAGER needs exactly one name -> {line.strip()}")
+            return
+        if findManager(words[1]) != None:
+            parserLog.warn(f"Line {number}: manager {words[1]} already exists, I keep the first one")
+            return
         managers.append(DisplayManager(words[1], managerLog))
         parserLog.trace(f"Manager {words[1]} created")
     elif command == "DISPLAY":
+        if len(words) != 5:
+            parserLog.error(f"Line {number}: DISPLAY needs model, width, height and ppi -> {line.strip()}")
+            return
+        if words[2].isdigit() == False or words[3].isdigit() == False:
+            parserLog.error(f"Line {number}: width and height must be whole numbers -> {line.strip()}")
+            return
+        if words[4].replace(".", "", 1).isdigit() == False:
+            parserLog.error(f"Line {number}: ppi must be a number, not {words[4]}")
+            return
+        if findDisplay(words[1]) != None:
+            parserLog.warn(f"Line {number}: display {words[1]} already exists, I keep the first one")
+            return
         d = Display(words[1], int(words[2]), int(words[3]), float(words[4]))
         displays.append(d)
         parserLog.trace(f'Display {d.model} created ({round(d.getDiagonal(), 1)}", {int(d.ppi)} ppi)')
     elif command == "ASSIGN":
+        if len(words) != 3:
+            parserLog.error(f"Line {number}: ASSIGN needs a model and a manager -> {line.strip()}")
+            return
         d = findDisplay(words[1])
         m = findManager(words[2])
-        m.assignDisplay(d)
+        if d == None:
+            parserLog.error(f"Line {number}: display {words[1]} does not exist")
+        elif m == None:
+            parserLog.error(f"Line {number}: manager {words[2]} does not exist")
+        elif d in m.assignedDisplays:
+            parserLog.warn(f"Line {number}: {words[1]} is already assigned to {words[2]}, not adding it again")
+        else:
+            m.assignDisplay(d)
     elif command == "COMPARE":
+        if len(words) != 3:
+            parserLog.error(f"Line {number}: COMPARE needs two models -> {line.strip()}")
+            return
         d1 = findDisplay(words[1])
         d2 = findDisplay(words[2])
-        print(f"Compare {d1.model} with {d2.model}:")
-        d1.compareWithMonitor(d2)
+        if d1 == None:
+            parserLog.error(f"Line {number}: display {words[1]} does not exist")
+        elif d2 == None:
+            parserLog.error(f"Line {number}: display {words[2]} does not exist")
+        else:
+            print(f"Compare {d1.model} with {d2.model}:")
+            d1.compareWithMonitor(d2)
     elif command == "ASSIST":
+        if len(words) != 2:
+            parserLog.error(f"Line {number}: ASSIST needs one manager -> {line.strip()}")
+            return
         m = findManager(words[1])
-        m.assist()
+        if m == None:
+            parserLog.error(f"Line {number}: manager {words[1]} does not exist")
+        else:
+            m.assist()
     elif command == "BUY":
+        if len(words) != 3:
+            parserLog.error(f"Line {number}: BUY needs a model and a manager -> {line.strip()}")
+            return
         d = findDisplay(words[1])
         m = findManager(words[2])
-        m.buyDisplay(d)
+        if d == None:
+            parserLog.error(f"Line {number}: display {words[1]} does not exist")
+        elif m == None:
+            parserLog.error(f"Line {number}: manager {words[2]} does not exist")
+        elif d not in m.assignedDisplays:
+            parserLog.error(f"Line {number}: {words[2]} does not have {words[1]}, can not buy it")
+        else:
+            m.buyDisplay(d)
     else:
-        print("Unknown command:", command)
+        parserLog.error(f"Line {number}: unknown command {command}")
 
 
 def runShop(path):
