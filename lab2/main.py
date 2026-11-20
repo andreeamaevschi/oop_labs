@@ -416,6 +416,14 @@ managerLog = Logger("Manager", formatter, sink)
 parserLog = Logger("Parser", formatter, sink)
 
 if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
+        found = False
+        for l in LogLevel:
+            if l.name == sys.argv[2]:
+                Logger.set_level(l)
+                found = True
+        if found == False:
+            parserLog.error(f"There is no level {sys.argv[2]}, I use INFO")
     runShop(sys.argv[1])
 else:
     test_formatter()
