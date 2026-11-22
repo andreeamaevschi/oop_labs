@@ -339,6 +339,9 @@ def parseCommand(line, number):
         if words[4].replace(".", "", 1).isdigit() == False:
             parserLog.error(f"Line {number}: ppi must be a number, not {words[4]}")
             return
+        if float(words[4]) == 0:
+            parserLog.error(f"Line {number}: ppi can not be 0, the size would be infinite")
+            return
         if findDisplay(words[1]) != None:
             parserLog.warn(f"Line {number}: display {words[1]} already exists, I keep the first one")
             return
